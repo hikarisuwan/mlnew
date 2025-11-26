@@ -46,7 +46,7 @@ class DataProcessor:
         df = pd.read_csv(self.filepath)
         df = df.dropna()
 
-        # Label cleaning
+        # Robust label cleaning
         labels = df.iloc[:, -1]
         if labels.dtype == 'object':
             labels = labels.str.strip().str.lower().replace({
@@ -122,9 +122,8 @@ class Classifier:
 
     def train_models(self, model_names: list[str] | None = None) -> None:
         """
-        Train specified models. 
+        Train specified models. If model_names is None, trains all available models.
         """
-        # Define all available models and their configurations
         all_models = {
             'Logistic Regression': (LogisticRegression(max_iter=2000, random_state=RANDOM_STATE), True),
             'KNN': (KNeighborsClassifier(n_neighbors=5), True),
@@ -248,7 +247,6 @@ class Evaluator:
         if importance is None: return
 
         features = self.classifier.data_processor.df.drop(columns=['label']).columns
-        # Sort
         indices = np.argsort(importance)[::-1]
         sorted_feats = [features[i] for i in indices]
         sorted_imps = importance[indices]
@@ -263,7 +261,6 @@ class Evaluator:
     def plot_learning_curve(self, classifier_name: str, filename: str) -> None:
         if classifier_name not in self.results: return
         
-        # Prepare estimator clone
         best_meta = self.results[classifier_name]
         estimator = clone(best_meta['model'])
         
