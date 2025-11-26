@@ -63,7 +63,7 @@ class DataProcessor:
         self.df = df
         return df
         
-    # Generates and saves a correlation matrix heatmap
+    # Generates a correlation matrix heatmap
     def plot_correlation_matrix(self, save_path: Path) -> None:
         if self.df is None:
             return
@@ -118,7 +118,7 @@ class Classifier:
         self.random_state = random_state
         self.results: dict[str, dict[str, object]] = {}
         
-    # Trains specified models or all default models if None provided
+    # Trains specified models or all models if None provided
     def train_models(self, model_names: list[str] | None = None) -> None:
         all_models = {
             'Logistic Regression': (LogisticRegression(max_iter=2000, random_state=self.random_state), True),
