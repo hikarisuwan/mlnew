@@ -1,0 +1,192 @@
+============================================================
+DATASET 2: UNKNOWN MATERIAL CLASSIFICATION
+============================================================
+
+### Step 1: Data Preparation ###
+Data loaded: 400 samples, 9 columns
+
+=== Data Exploration ===
+
+Shape: (400, 9)
+
+Data types:
+feature_1    float64
+feature_2    float64
+feature_3    float64
+feature_4    float64
+feature_5    float64
+feature_6    float64
+feature_7    float64
+feature_8    float64
+label          int64
+dtype: object
+
+Missing values:
+feature_1    5
+feature_2    5
+feature_3    3
+feature_4    5
+feature_5    2
+feature_6    4
+feature_7    3
+feature_8    5
+label        0
+dtype: int64
+
+Basic statistics:
+        feature_1   feature_2   feature_3  ...   feature_7   feature_8       label
+count  395.000000  395.000000  397.000000  ...  397.000000  395.000000  400.000000
+mean     0.375002    0.326357    0.376342  ...    0.272010    0.285192    0.500000
+std      0.535336    0.503988    0.525801  ...    0.492184    0.480824    0.500626
+min     -0.484361   -0.498729   -0.493204  ...   -0.490519   -0.482924    0.000000
+25%     -0.010514   -0.017108   -0.010496  ...   -0.017901   -0.016062    0.000000
+50%      0.055096    0.041616    0.059002  ...    0.018837    0.025985    0.500000
+75%      0.971941    0.785659    0.929729  ...    0.544298    0.548121    1.000000
+max      1.483827    1.495460    1.495021  ...    1.486849    1.499993    1.000000
+
+[8 rows x 9 columns]
+
+Class distribution:
+label
+0    200
+1    200
+Name: count, dtype: int64
+
+Data cleaning:
+  Original samples: 400
+  Rows with missing values dropped: 32
+  Remaining samples: 368
+  Data retention: 92.0%
+
+Data split: 294 training samples, 74 test samples
+
+### Step 2: Correlation Analysis ###
+Saved correlation matrix to outputs/dataset2_correlation_matrix.png
+
+=== Correlation with Target Label ===
+  feature_8                     :  0.6057
+  feature_7                     :  0.5528
+  feature_6                     :  0.5377
+  feature_3                     :  0.3567
+  feature_4                     :  0.3133
+  feature_1                     :  0.3119
+  feature_5                     :  0.2900
+  feature_2                     :  0.2341
+
+### Step 3: Training Multiple Classifiers ###
+
+Training logistic classifier...
+Training completed.
+
+=== Logistic Performance ===
+Accuracy:  0.9595
+Precision: 1.0000
+Recall:    0.9189
+F1-Score:  0.9577
+
+Training random_forest classifier...
+Training completed.
+
+=== Random Forest Performance ===
+Accuracy:  1.0000
+Precision: 1.0000
+Recall:    1.0000
+F1-Score:  1.0000
+
+Training svm classifier...
+Training completed.
+
+=== Svm Performance ===
+Accuracy:  0.9595
+Precision: 1.0000
+Recall:    0.9189
+F1-Score:  0.9577
+
+Training knn classifier...
+Training completed.
+
+=== Knn Performance ===
+Accuracy:  0.9324
+Precision: 1.0000
+Recall:    0.8649
+F1-Score:  0.9275
+
+Training gradient_boosting classifier...
+Training completed.
+
+=== Gradient Boosting Performance ===
+Accuracy:  0.9595
+Precision: 1.0000
+Recall:    0.9189
+F1-Score:  0.9577
+
+Training naive_bayes classifier...
+Training completed.
+
+=== Naive Bayes Performance ===
+Accuracy:  1.0000
+Precision: 1.0000
+Recall:    1.0000
+F1-Score:  1.0000
+
+### Step 4: Classifier Comparison ###
+Saved classifier comparison to outputs/dataset2_classifier_comparison.png
+
+### Step 5: Confusion Matrices for All Classifiers ###
+Saved confusion matrix to outputs/dataset2_confusion_matrix_logistic.png
+Saved confusion matrix to outputs/dataset2_confusion_matrix_random_forest.png
+Saved confusion matrix to outputs/dataset2_confusion_matrix_svm.png
+Saved confusion matrix to outputs/dataset2_confusion_matrix_knn.png
+Saved confusion matrix to outputs/dataset2_confusion_matrix_gradient_boosting.png
+Saved confusion matrix to outputs/dataset2_confusion_matrix_naive_bayes.png
+
+### Step 6: Best Classifier Selection ###
+
+🏆 Best Classifier: Random Forest
+   Accuracy: 1.0000
+
+### Step 7: Learning Curve Analysis ###
+
+Generating learning curve... This may take a moment.
+Saved learning curve to outputs/dataset2_learning_curve.png
+
+✓ Minimum samples for 70% accuracy: 29 samples
+  Accuracy achieved: 0.9646
+
+======================================================================
+EXECUTIVE SUMMARY - DATASET 2
+======================================================================
+
+📊 CLASSIFIERS TESTED:
+  1. Random Forest        - Accuracy: 1.0000, F1-Score: 1.0000
+  2. Naive Bayes          - Accuracy: 1.0000, F1-Score: 1.0000
+  3. Logistic             - Accuracy: 0.9595, F1-Score: 0.9577
+  4. Svm                  - Accuracy: 0.9595, F1-Score: 0.9577
+  5. Gradient Boosting    - Accuracy: 0.9595, F1-Score: 0.9577
+  6. Knn                  - Accuracy: 0.9324, F1-Score: 0.9275
+
+🏆 BEST CLASSIFIER: Random Forest
+  • Accuracy:  1.0000
+  • Precision: 1.0000
+  • Recall:    1.0000
+  • F1-Score:  1.0000
+
+📈 LEARNING CURVE ANALYSIS:
+  ✓ 70% accuracy threshold: ACHIEVED
+  • Minimum samples required: 29 datapoints
+  • Accuracy at minimum: 96.46%
+  • Percentage of full dataset: 7.9%
+
+💡 OBSERVATIONS:
+  • Dataset 2 has limited samples (368 total)
+  • 6 different classifiers tested
+  • Best classifier: Random Forest
+
+✅ RECOMMENDATION:
+  Use Random Forest classifier for production deployment.
+  Minimum of 29 datapoints required for 70% accuracy.
+  For optimal performance, use full dataset of 368 samples.
+======================================================================
+
+✅ Dataset 2 analysis completed!
+📁 All plots saved to 'outputs/' directory
