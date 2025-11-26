@@ -20,7 +20,7 @@ from sklearn.metrics import (
     confusion_matrix,
 )
 
-# Does loading, cleaning, and preprocessing of the dataset
+# Does loading, cleaning and preprocessing of the dataset
 class DataProcessor:
 
     def __init__(self, filepath: str, random_state: int = 67):
