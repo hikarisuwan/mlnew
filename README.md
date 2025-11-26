@@ -20,8 +20,8 @@ This project implements machine learning classifiers for two materials science d
 ```
 advanced python computing project 2025/
 ├── ml_classes.py                   # Core ML classes (Preprocessor, Classifier, Evaluator)
-├── dataset1_analysis.py            # Dataset 1 analysis script
-├── dataset2_analysis.py            # Dataset 2 analysis script
+├── dataset_1_code.py               # Dataset 1 analysis script
+├── dataset_2_code.py               # Dataset 2 analysis script
 ├── materials_classification.ipynb  # Jupyter notebook version
 ├── requirements.txt                # Python dependencies
 ├── dataset_1.csv                   # Alloy conductivity dataset
@@ -55,10 +55,10 @@ Run the individual analysis scripts:
 
 ```bash
 # Dataset 1 - Alloy Conductivity Classification
-python dataset1_analysis.py
+python3 dataset_1_code.py
 
 # Dataset 2 - Unknown Material Classification
-python dataset2_analysis.py
+python3 dataset_2_code.py
 ```
 
 Each script will:
