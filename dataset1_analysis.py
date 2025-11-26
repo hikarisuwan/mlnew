@@ -20,8 +20,7 @@ def main() -> None:
     evaluator.plot_confusion_matrices('dataset1_confusion_matrix')
     evaluator.plot_comparison('dataset1_classifier_comparison.png')
     
-    # 4. Critical: Feature Importance for Cost Reduction
-    print("\nVisualizing Feature Importance...")
+    # 4. Feature Importance for Cost Reduction
     evaluator.plot_feature_importance('dataset1_feature_importance.png')
 
 if __name__ == '__main__':

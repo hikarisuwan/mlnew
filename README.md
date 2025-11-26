@@ -22,8 +22,6 @@ advanced python computing project 2025/
 ├── ml_classes.py                   # Core ML classes (Preprocessor, Classifier, Evaluator)
 ├── dataset1_analysis.py            # Dataset 1 analysis script
 ├── dataset2_analysis.py            # Dataset 2 analysis script
-├── run_all.py                      # Main script to run both analyses
-├── test_setup.py                   # Setup verification script
 ├── materials_classification.ipynb  # Jupyter notebook version
 ├── requirements.txt                # Python dependencies
 ├── dataset_1.csv                   # Alloy conductivity dataset
@@ -51,41 +49,23 @@ pip install numpy pandas matplotlib seaborn scikit-learn jupyter
 
 ## Usage
 
-### Quick Start (Python Scripts - Recommended)
+### Running the Analysis Scripts
 
-1. **Activate virtual environment:**
-
-```bash
-source venv/bin/activate
-```
-
-2. **Test your setup:**
+Run the individual analysis scripts:
 
 ```bash
-python test_setup.py
-```
-
-3. **Run complete analysis:**
-
-```bash
-python run_all.py
-```
-
-This will:
-- Analyze Dataset 1 (alloy conductivity)
-- Analyze Dataset 2 (unknown materials)
-- Generate all visualizations in `outputs/` directory
-- Print executive summaries
-
-### Alternative: Run Individual Analyses
-
-```bash
-# Dataset 1 only
+# Dataset 1 - Alloy Conductivity Classification
 python dataset1_analysis.py
 
-# Dataset 2 only
+# Dataset 2 - Unknown Material Classification
 python dataset2_analysis.py
 ```
+
+Each script will:
+- Load and clean the data
+- Train multiple classifiers
+- Generate visualizations in `outputs/` directory
+- Print performance metrics
 
 ### Alternative: Jupyter Notebook
 
