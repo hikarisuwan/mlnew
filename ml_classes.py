@@ -19,11 +19,9 @@ from sklearn.metrics import (
     f1_score,
     confusion_matrix,
 )
-
+ # Does loading, cleaning, and preprocessing of the dataset
 class DataProcessor:
-    """
-    Handles loading, cleaning, and preprocessing of the dataset.
-    """
+
     def __init__(self, filepath: str, random_state: int = 67):
         """
         Args:
@@ -40,14 +38,10 @@ class DataProcessor:
         self.X_train_scaled: np.ndarray | None = None
         self.X_test_scaled: np.ndarray | None = None
         self.scaler: StandardScaler | None = None
-
-    def clean_data(self) -> pd.DataFrame:
-        """
-        Loads data, standardizes labels, and removes missing values.
         
-        Returns:
-            pd.DataFrame: The cleaned dataframe.
-        """
+  # Loads data, standardises labels and removes missing values
+    def clean_data(self) -> pd.DataFrame:
+       
         df = pd.read_csv(self.filepath)
         df = df.dropna()
 
@@ -75,12 +69,10 @@ class DataProcessor:
 
         self.df = df
         return df
-
-    def plot_correlation_matrix(self, save_path: Path) -> None:
-        """
-        Generates and saves a correlation matrix heatmap.
         
-        """
+    # Generates and saves a correlation matrix heatmap
+    def plot_correlation_matrix(self, save_path: Path) -> None:
+        
         if self.df is None:
             raise ValueError("Data must be cleaned before plotting correlations.")
 
@@ -109,10 +101,9 @@ class DataProcessor:
         print(f"Saved plot to {save_path}")
         plt.close(fig)
 
+    # Splits data into train/test sets and scales features
     def split_and_scale(self, test_size: float = 0.2) -> None:
-        """
-        Splits data into train/test sets and scales features.
-        """
+        
         if self.df is None:
             raise ValueError("Clean the data before splitting.")
 
@@ -131,20 +122,18 @@ class DataProcessor:
         self.y_train, self.y_test = y_train, y_test
 
         print(f"Training samples: {len(X_train)} | Test samples: {len(X_test)}")
-
+        
+# Manages model training
 class Classifier:
-    """
-    Manages model training and metric computation.
-    """
+    
     def __init__(self, data_processor: DataProcessor, random_state: int = 67):
         self.dp = data_processor
         self.random_state = random_state
         self.results: dict[str, dict[str, object]] = {}
-
+        
+# Trains specified models or all default models if None provided
     def train_models(self, model_names: list[str] | None = None) -> None:
-        """
-        Trains specified models or all default models if None provided.
-        """
+       
         all_models = {
             'Logistic Regression': (LogisticRegression(max_iter=2000, random_state=self.random_state), True),
             'KNN': (KNeighborsClassifier(n_neighbors=5), True),
@@ -191,10 +180,9 @@ class Classifier:
             return np.abs(model.coef_[0])
         return None
 
+# Generates plots for classifiers
 class Evaluator:
-    """
-    Generates reports and plots for trained classifiers.
-    """
+   
     def __init__(self, classifier: Classifier, output_dir: Path):
         self.classifier = classifier
         self.results = classifier.results
@@ -218,10 +206,8 @@ class Evaluator:
                 'Recall': f"{result['recall']:.4f}",
                 'F1-Score': f"{result['f1']:.4f}",
             })
-        print(pd.DataFrame(summary_data).to_string(index=False))
         
         best_name, best_res = max(self.results.items(), key=lambda x: x[1]['accuracy'])
-        print(f"\nBest Classifier: {best_name} (Accuracy: {best_res['accuracy']:.4f})")
 
     def plot_confusion_matrices(self, filename_prefix: str) -> None:
         n = len(self.results)
@@ -308,14 +294,11 @@ class Evaluator:
         ax.grid(alpha=0.3)
         fig.tight_layout()
         self._save_plot(fig, filename)
-
+        
+# Standardised pipeline with conditional plotting based on dataset requirements
 def run_full_analysis(dataset_path: str, output_dir_name: str, model_list: list[str] | None = None,
                       run_feature_importance: bool = False, run_learning_curve: bool = False) -> None:
-    """
-    Standardized pipeline with conditional plotting based on dataset requirements.
-    """
-    print(f"=== Starting Analysis for {dataset_path} ===")
-    
+       
     # Setup paths
     base_dir = Path(dataset_path).parent
     output_dir = base_dir / output_dir_name
