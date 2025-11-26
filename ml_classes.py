@@ -232,6 +232,7 @@ class Evaluator:
 
         fig, ax = plt.subplots(figsize=(12, 6))
         ax.bar(sorted_feats, sorted_imps, color='#2ca02c')
+        ax.set_xticks(range(len(sorted_feats)))
         ax.set_xticklabels(sorted_feats, rotation=45, ha='right')
         ax.set_title(f'Feature Importances – {classifier_name}')
         fig.tight_layout()
