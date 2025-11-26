@@ -12,7 +12,7 @@ from ml_classes import run_full_analysis
 def main() -> None:
     csv_path = os.path.join(current_dir, 'dataset_1.csv')
     
-    # Run pipeline for Dataset 1
+    # Run pipeline for dataset 1
     run_full_analysis(
         dataset_path=csv_path,
         output_dir_name='outputs_ds1',
