@@ -46,8 +46,8 @@ class DataProcessor:
         df = pd.read_csv(self.filepath)
         df = df.dropna()
 
-        # Robust label cleaning for both datasets
-        labels = df.iloc[:, -1] # Assume last column is label
+        # Label cleaning
+        labels = df.iloc[:, -1]
         if labels.dtype == 'object':
             labels = labels.str.strip().str.lower().replace({
                 'non-conductive': '0', 
@@ -56,13 +56,11 @@ class DataProcessor:
                 'class 1': '1'
             })
         
-        # Assign back to the correct column name (dynamic)
         target_col = df.columns[-1]
         df[target_col] = pd.to_numeric(labels, errors='coerce')
         df = df.dropna(subset=[target_col])
         df[target_col] = df[target_col].astype(int)
         
-        # Rename target column to 'label' for consistency if needed, or just track it
         if target_col != 'label':
             df = df.rename(columns={target_col: 'label'})
 
@@ -122,14 +120,28 @@ class Classifier:
         self.data_processor = data_processor
         self.results: dict[str, dict[str, object]] = {}
 
-    def train_all(self) -> None:
-        # Train superset of models
-        self._train_with_settings('Logistic Regression', LogisticRegression(max_iter=2000, random_state=RANDOM_STATE), scaled=True)
-        self._train_with_settings('KNN', KNeighborsClassifier(n_neighbors=5), scaled=True)
-        self._train_with_settings('Random Forest', RandomForestClassifier(n_estimators=200, random_state=RANDOM_STATE), scaled=False)
-        self._train_with_settings('SVM', SVC(kernel='rbf', probability=True, random_state=RANDOM_STATE), scaled=True)
-        self._train_with_settings('Gradient Boosting', GradientBoostingClassifier(random_state=RANDOM_STATE), scaled=False)
-        self._train_with_settings('Naive Bayes', GaussianNB(), scaled=True)
+    def train_models(self, model_names: list[str] | None = None) -> None:
+        """
+        Train specified models. 
+        """
+        # Define all available models and their configurations
+        all_models = {
+            'Logistic Regression': (LogisticRegression(max_iter=2000, random_state=RANDOM_STATE), True),
+            'KNN': (KNeighborsClassifier(n_neighbors=5), True),
+            'Random Forest': (RandomForestClassifier(n_estimators=200, random_state=RANDOM_STATE), False),
+            'SVM': (SVC(kernel='rbf', probability=True, random_state=RANDOM_STATE), True),
+            'Gradient Boosting': (GradientBoostingClassifier(random_state=RANDOM_STATE), False),
+            'Naive Bayes': (GaussianNB(), True)
+        }
+
+        if model_names:
+            models_to_train = {name: all_models[name] for name in model_names if name in all_models}
+        else:
+            models_to_train = all_models
+
+        for name, (model, use_scaled) in models_to_train.items():
+            print(f"Training {name}...")
+            self._train_with_settings(name, model, scaled=use_scaled)
 
     def _train_with_settings(self, name: str, model, scaled: bool) -> None:
         if scaled:
@@ -153,7 +165,6 @@ class Classifier:
             'recall': recall_score(y_test, predictions, zero_division=0),
             'f1': f1_score(y_test, predictions, zero_division=0),
             'confusion_matrix': confusion_matrix(y_test, predictions),
-            # Check if model was trained on scaled data (heuristic for learning curve)
             'requires_scaling': isinstance(model, (LogisticRegression, KNeighborsClassifier, SVC, GaussianNB))
         }
 

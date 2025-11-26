@@ -1,8 +1,6 @@
-
 from ml_classes import DataProcessor, Classifier, Evaluator
 
 def main() -> None:
-    print("=== DATASET 1 ANALYSIS ===")
     
     # 1. Process
     processor = DataProcessor('dataset1/dataset_1.csv')
@@ -10,13 +8,15 @@ def main() -> None:
     processor.plot_correlation_matrix('dataset1_correlation_matrix.png')
     processor.split_and_scale()
 
-    # 2. Train
+    # 2. Train -  Logistic Regression, Random Forest, and KNN 
     classifier = Classifier(processor)
-    classifier.train_all()
+    classifier.train_models(['Logistic Regression', 'Random Forest', 'KNN'])
 
     # 3. Evaluate
     evaluator = Evaluator(classifier)
     evaluator.print_summary()
+    
+    # Generates the combined matrix file
     evaluator.plot_confusion_matrices('dataset1_confusion_matrix')
     evaluator.plot_comparison('dataset1_classifier_comparison.png')
     
@@ -25,4 +25,3 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
-

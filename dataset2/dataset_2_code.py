@@ -1,8 +1,6 @@
-
 from ml_classes import DataProcessor, Classifier, Evaluator
 
 def main() -> None:
-    print("=== DATASET 2 ANALYSIS ===")
     
     # 1. Process
     processor = DataProcessor('dataset2/dataset_2.csv')
@@ -10,21 +8,22 @@ def main() -> None:
     processor.plot_correlation_matrix('dataset2_correlation_matrix.png')
     processor.split_and_scale()
 
-    # 2. Train
+    # 2. Train - Trains all available models 
     classifier = Classifier(processor)
-    classifier.train_all()
+    classifier.train_models() 
 
     # 3. Evaluate
     evaluator = Evaluator(classifier)
     evaluator.print_summary()
+    
+    # Generates the combined matrix file
     evaluator.plot_confusion_matrices('dataset2_confusion_matrix')
     evaluator.plot_comparison('dataset2_classifier_comparison.png')
     
-    # 4. Critical: Learning Curve for Sample Size
+    # 4. Learning Curve 
     best_name, _ = evaluator.get_best_classifier()
     print(f"\nGenerating Learning Curve for {best_name}...")
     evaluator.plot_learning_curve(best_name, 'dataset2_learning_curve.png')
 
 if __name__ == '__main__':
     main()
-
