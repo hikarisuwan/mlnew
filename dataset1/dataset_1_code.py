@@ -5,7 +5,7 @@ def main() -> None:
     print("=== DATASET 1 ANALYSIS ===")
     
     # 1. Process
-    processor = DataProcessor('dataset_1.csv')
+    processor = DataProcessor('dataset1/dataset_1.csv')
     processor.clean_data()
     processor.plot_correlation_matrix('dataset1_correlation_matrix.png')
     processor.split_and_scale()
