@@ -20,19 +20,18 @@ from sklearn.metrics import (
     confusion_matrix,
 )
 
-OUTPUT_DIR = Path("outputs")
-OUTPUT_DIR.mkdir(exist_ok=True)
-RANDOM_STATE = 67
-
-def _save_plot(fig: plt.Figure, filename: str) -> None:
-    path = OUTPUT_DIR / filename
-    fig.savefig(path, dpi=300, bbox_inches="tight")
-    print(f"Saved plot to {path}")
-    plt.close(fig)
-
 class DataProcessor:
-    def __init__(self, filepath: str):
+    """
+    Handles loading, cleaning, and preprocessing of the dataset.
+    """
+    def __init__(self, filepath: str, random_state: int = 67):
+        """
+        Args:
+            filepath (str): Path to the CSV file.
+            random_state (int): Seed for reproducibility.
+        """
         self.filepath = filepath
+        self.random_state = random_state
         self.df: pd.DataFrame | None = None
         self.X_train: pd.DataFrame | None = None
         self.X_test: pd.DataFrame | None = None
@@ -43,10 +42,16 @@ class DataProcessor:
         self.scaler: StandardScaler | None = None
 
     def clean_data(self) -> pd.DataFrame:
+        """
+        Loads data, standardizes labels, and removes missing values.
+        
+        Returns:
+            pd.DataFrame: The cleaned dataframe.
+        """
         df = pd.read_csv(self.filepath)
         df = df.dropna()
 
-        # Robust label cleaning
+        # Label cleaning to handle both string and numeric inputs
         labels = df.iloc[:, -1]
         if labels.dtype == 'object':
             labels = labels.str.strip().str.lower().replace({
@@ -71,7 +76,11 @@ class DataProcessor:
         self.df = df
         return df
 
-    def plot_correlation_matrix(self, filename: str) -> None:
+    def plot_correlation_matrix(self, save_path: Path) -> None:
+        """
+        Generates and saves a correlation matrix heatmap.
+        
+        """
         if self.df is None:
             raise ValueError("Data must be cleaned before plotting correlations.")
 
@@ -84,6 +93,7 @@ class DataProcessor:
         ax.set_yticks(range(len(corr.columns)))
         ax.set_yticklabels(corr.columns)
 
+        # Annotate heatmap
         for i in range(len(corr.columns)):
             for j in range(len(corr.columns)):
                 val = corr.iloc[i, j]
@@ -93,9 +103,16 @@ class DataProcessor:
         ax.set_title("Correlation Matrix")
         fig.colorbar(im, ax=ax, shrink=0.8)
         fig.tight_layout()
-        _save_plot(fig, filename)
+        
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(save_path, dpi=300, bbox_inches="tight")
+        print(f"Saved plot to {save_path}")
+        plt.close(fig)
 
     def split_and_scale(self, test_size: float = 0.2) -> None:
+        """
+        Splits data into train/test sets and scales features.
+        """
         if self.df is None:
             raise ValueError("Clean the data before splitting.")
 
@@ -103,7 +120,7 @@ class DataProcessor:
         y = self.df['label']
 
         X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=test_size, random_state=RANDOM_STATE, stratify=y
+            X, y, test_size=test_size, random_state=self.random_state, stratify=y
         )
 
         self.scaler = StandardScaler()
@@ -116,46 +133,43 @@ class DataProcessor:
         print(f"Training samples: {len(X_train)} | Test samples: {len(X_test)}")
 
 class Classifier:
-    def __init__(self, data_processor: DataProcessor):
-        self.data_processor = data_processor
+    """
+    Manages model training and metric computation.
+    """
+    def __init__(self, data_processor: DataProcessor, random_state: int = 67):
+        self.dp = data_processor
+        self.random_state = random_state
         self.results: dict[str, dict[str, object]] = {}
 
     def train_models(self, model_names: list[str] | None = None) -> None:
         """
-        Train specified models. If model_names is None, trains all available models.
+        Trains specified models or all default models if None provided.
         """
         all_models = {
-            'Logistic Regression': (LogisticRegression(max_iter=2000, random_state=RANDOM_STATE), True),
+            'Logistic Regression': (LogisticRegression(max_iter=2000, random_state=self.random_state), True),
             'KNN': (KNeighborsClassifier(n_neighbors=5), True),
-            'Random Forest': (RandomForestClassifier(n_estimators=200, random_state=RANDOM_STATE), False),
-            'SVM': (SVC(kernel='rbf', probability=True, random_state=RANDOM_STATE), True),
-            'Gradient Boosting': (GradientBoostingClassifier(random_state=RANDOM_STATE), False),
+            'Random Forest': (RandomForestClassifier(n_estimators=200, random_state=self.random_state), False),
+            'SVM': (SVC(kernel='rbf', probability=True, random_state=self.random_state), True),
+            'Gradient Boosting': (GradientBoostingClassifier(random_state=self.random_state), False),
             'Naive Bayes': (GaussianNB(), True)
         }
 
-        if model_names:
-            models_to_train = {name: all_models[name] for name in model_names if name in all_models}
-        else:
-            models_to_train = all_models
+        models_to_train = {name: all_models[name] for name in model_names} if model_names else all_models
 
         for name, (model, use_scaled) in models_to_train.items():
             print(f"Training {name}...")
-            self._train_with_settings(name, model, scaled=use_scaled)
+            self._train_single_model(name, model, use_scaled)
 
-    def _train_with_settings(self, name: str, model, scaled: bool) -> None:
-        if scaled:
-            X_train = self.data_processor.X_train_scaled
-            X_test = self.data_processor.X_test_scaled
-        else:
-            X_train = self.data_processor.X_train
-            X_test = self.data_processor.X_test
+    def _train_single_model(self, name: str, model, scaled: bool) -> None:
+        X_train = self.dp.X_train_scaled if scaled else self.dp.X_train
+        X_test = self.dp.X_test_scaled if scaled else self.dp.X_test
 
-        model.fit(X_train, self.data_processor.y_train)
+        model.fit(X_train, self.dp.y_train)
         predictions = model.predict(X_test)
         self.results[name] = self._compute_metrics(model, predictions)
 
     def _compute_metrics(self, model, predictions: np.ndarray) -> dict[str, object]:
-        y_test = self.data_processor.y_test
+        y_test = self.dp.y_test
         return {
             'model': model,
             'predictions': predictions,
@@ -178,12 +192,23 @@ class Classifier:
         return None
 
 class Evaluator:
-    def __init__(self, classifier: Classifier):
+    """
+    Generates reports and plots for trained classifiers.
+    """
+    def __init__(self, classifier: Classifier, output_dir: Path):
         self.classifier = classifier
         self.results = classifier.results
+        self.output_dir = output_dir
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+
+    def _save_plot(self, fig: plt.Figure, filename: str) -> None:
+        path = self.output_dir / filename
+        fig.savefig(path, dpi=300, bbox_inches="tight")
+        print(f"Saved plot to {path}")
+        plt.close(fig)
 
     def print_summary(self) -> None:
-        print("\nClassifier performance comparison\n")
+        print("\n=== Classifier Performance Summary ===\n")
         summary_data = []
         for name, result in self.results.items():
             summary_data.append({
@@ -195,11 +220,8 @@ class Evaluator:
             })
         print(pd.DataFrame(summary_data).to_string(index=False))
         
-        best_name, best_res = self.get_best_classifier()
-        print(f"\nBest classifier: {best_name} | Accuracy: {best_res['accuracy']:.4f}")
-
-    def get_best_classifier(self) -> tuple[str, dict[str, object]]:
-        return max(self.results.items(), key=lambda x: x[1]['accuracy'])
+        best_name, best_res = max(self.results.items(), key=lambda x: x[1]['accuracy'])
+        print(f"\nBest Classifier: {best_name} (Accuracy: {best_res['accuracy']:.4f})")
 
     def plot_confusion_matrices(self, filename_prefix: str) -> None:
         n = len(self.results)
@@ -222,7 +244,7 @@ class Evaluator:
         
         for ax in axes[n:]: ax.axis('off')
         fig.tight_layout()
-        _save_plot(fig, f"{filename_prefix}_combined.png")
+        self._save_plot(fig, f"{filename_prefix}_combined.png")
 
     def plot_comparison(self, filename: str) -> None:
         metrics = ['accuracy', 'precision', 'recall', 'f1']
@@ -240,13 +262,14 @@ class Evaluator:
         ax.legend()
         ax.set_title('Classifier Performance Comparison')
         fig.tight_layout()
-        _save_plot(fig, filename)
+        self._save_plot(fig, filename)
 
     def plot_feature_importance(self, filename: str, classifier_name: str = 'Random Forest') -> None:
         importance = self.classifier.get_feature_importance(classifier_name)
-        if importance is None: return
+        if importance is None: 
+            return
 
-        features = self.classifier.data_processor.df.drop(columns=['label']).columns
+        features = self.classifier.dp.df.drop(columns=['label']).columns
         indices = np.argsort(importance)[::-1]
         sorted_feats = [features[i] for i in indices]
         sorted_imps = importance[indices]
@@ -256,7 +279,7 @@ class Evaluator:
         ax.set_xticklabels(sorted_feats, rotation=45, ha='right')
         ax.set_title(f'Feature Importances – {classifier_name}')
         fig.tight_layout()
-        _save_plot(fig, filename)
+        self._save_plot(fig, filename)
 
     def plot_learning_curve(self, classifier_name: str, filename: str) -> None:
         if classifier_name not in self.results: return
@@ -267,12 +290,13 @@ class Evaluator:
         if best_meta['requires_scaling']:
             estimator = Pipeline([('scaler', StandardScaler()), ('model', estimator)])
             
-        X = self.classifier.data_processor.df.drop(columns=['label'])
-        y = self.classifier.data_processor.df['label']
+        X = self.classifier.dp.df.drop(columns=['label'])
+        y = self.classifier.dp.df['label']
         
+        # Using random_state from the classifier instance ensures consistency
         train_sizes, train_scores, test_scores = learning_curve(
             estimator, X, y, cv=5, n_jobs=-1, 
-            train_sizes=np.linspace(0.1, 1.0, 8), random_state=RANDOM_STATE
+            train_sizes=np.linspace(0.1, 1.0, 8), random_state=self.classifier.random_state
         )
         
         fig, ax = plt.subplots(figsize=(10, 6))
@@ -283,4 +307,39 @@ class Evaluator:
         ax.legend()
         ax.grid(alpha=0.3)
         fig.tight_layout()
-        _save_plot(fig, filename)
+        self._save_plot(fig, filename)
+
+def run_full_analysis(dataset_path: str, output_dir_name: str, model_list: list[str] | None = None,
+                      run_feature_importance: bool = False, run_learning_curve: bool = False) -> None:
+    """
+    Standardized pipeline with conditional plotting based on dataset requirements.
+    """
+    print(f"=== Starting Analysis for {dataset_path} ===")
+    
+    # Setup paths
+    base_dir = Path(dataset_path).parent
+    output_dir = base_dir / output_dir_name
+    
+    # 1. Process
+    processor = DataProcessor(dataset_path, random_state=67)
+    processor.clean_data()
+    processor.plot_correlation_matrix(output_dir / 'correlation_matrix.png')
+    processor.split_and_scale()
+
+    # 2. Train
+    classifier = Classifier(processor, random_state=67)
+    classifier.train_models(model_list)
+
+    # 3. Evaluate
+    evaluator = Evaluator(classifier, output_dir)
+    evaluator.print_summary()
+    evaluator.plot_confusion_matrices('confusion_matrix')
+    evaluator.plot_comparison('classifier_comparison.png')
+    
+    # 4. Advanced Plots for Feature Importance for Dataset 1 and Learning Curve for Dataset 2
+    if run_feature_importance:
+        evaluator.plot_feature_importance('feature_importance.png')
+    
+    if run_learning_curve:
+        best_name, _ = max(classifier.results.items(), key=lambda x: x[1]['accuracy'])
+        evaluator.plot_learning_curve(best_name, 'learning_curve.png')
