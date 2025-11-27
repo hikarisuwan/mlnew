@@ -20,7 +20,7 @@ from sklearn.metrics import (
     confusion_matrix,
 )
 
-# Does loading, cleaning and preprocessing of the dataset
+# does loading, cleaning and preprocessing of the dataset
 class DataProcessor:
 
     def __init__(self, filepath: str, random_state: int = 67):
@@ -35,11 +35,12 @@ class DataProcessor:
         self.X_test_scaled: np.ndarray | None = None
         self.scaler: StandardScaler | None = None
         
-    # Loads data, standardises labels and removes missing values
+    # loads data, standardises labels and removes missing values
     def clean_data(self) -> pd.DataFrame:
         df = pd.read_csv(self.filepath)
         df = df.dropna()
 
+    # we knew data was already perfect numbers but we added this to ensure they are in standard numeric format
         labels = df.iloc[:, -1]
         if labels.dtype == 'object':
             labels = labels.str.strip().str.lower().replace({
@@ -63,7 +64,7 @@ class DataProcessor:
         self.df = df
         return df
         
-    # Generates a correlation matrix heatmap
+    # generates a correlation matrix heatmap
     def plot_correlation_matrix(self, save_path: Path) -> None:
         if self.df is None:
             return
@@ -91,7 +92,7 @@ class DataProcessor:
         fig.savefig(save_path, dpi=300, bbox_inches="tight")
         plt.close(fig)
 
-    # Splits data into train/test sets and scales features
+    # splits data into train/test sets and scales features
     def split_and_scale(self, test_size: float = 0.2) -> None:
         if self.df is None:
             return
@@ -110,7 +111,7 @@ class DataProcessor:
         self.X_train, self.X_test = X_train, X_test
         self.y_train, self.y_test = y_train, y_test
 
-# Manages model training
+# manages model training
 class Classifier:
     
     def __init__(self, data_processor: DataProcessor, random_state: int = 67):
@@ -118,7 +119,7 @@ class Classifier:
         self.random_state = random_state
         self.results: dict[str, dict[str, object]] = {}
         
-    # Trains specified models or all models if None provided
+    # trains specified models or all models if None provided
     def train_models(self, model_names: list[str] | None = None) -> None:
         all_models = {
             'Logistic Regression': (LogisticRegression(max_iter=2000, random_state=self.random_state), True),
@@ -165,7 +166,7 @@ class Classifier:
             return np.abs(model.coef_[0])
         return None
 
-# Generates plots for classifiers
+# generates plots for classifiers
 class Evaluator:
    
     def __init__(self, classifier: Classifier, output_dir: Path):
@@ -265,7 +266,7 @@ class Evaluator:
         fig.tight_layout()
         self._save_plot(fig, filename)
         
-# Standardised pipeline with conditional plotting based on dataset requirements
+# standardised pipeline with conditional plotting based on dataset requirements
 def run_full_analysis(dataset_path: str, output_dir_name: str, model_list: list[str] | None = None,
                       run_feature_importance: bool = False, run_learning_curve: bool = False) -> None:
        
