@@ -1,7 +1,7 @@
 import sys
 import os 
 
-# we added sys.path to ensure 'ml_classes' imports from any working directory
+# we modify sys.path to ensure 'ml_classes' imports from any working directory
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 if parent_dir not in sys.path:
