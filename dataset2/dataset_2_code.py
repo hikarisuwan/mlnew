@@ -1,7 +1,7 @@
 import sys
 import os 
 
-# we added the parent directory to sys.path to import 'ml_classes' import os just makes it easier to run command from different directory 
+# we added sys.path to ensure 'ml_classes' imports from any working directory
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 if parent_dir not in sys.path:
