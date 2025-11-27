@@ -17,7 +17,8 @@ def main() -> None:
         dataset_path=csv_path,
         output_dir_name='outputs_ds2',
         run_feature_importance=False, 
-        run_learning_curve=True
+        run_learning_curve=True,
+        impute_missing=True
     )
 
 if __name__ == '__main__':
