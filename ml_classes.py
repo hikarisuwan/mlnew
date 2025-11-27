@@ -35,10 +35,15 @@ class DataProcessor:
         self.X_test_scaled: np.ndarray | None = None
         self.scaler: StandardScaler | None = None
         
-    # loads data, standardises labels and removes missing values
-    def clean_data(self) -> pd.DataFrame:
+    # loads data, standardises labels and removes missing values(dataset 1) or imputes them(dataset 2)
+    def clean_data(self, impute: bool = False) -> pd.DataFrame:
         df = pd.read_csv(self.filepath)
-        df = df.dropna()
+        
+        if impute:
+            # we chose imputation for dataset 2 because data is small
+            df.fillna(df.mean(numeric_only=True), inplace=True)
+        else:
+            df = df.dropna()
 
     # we knew data was already perfect numbers but we added this to ensure they are in standard numeric format
         labels = df.iloc[:, -1]
@@ -268,13 +273,14 @@ class Evaluator:
         
 # standardised pipeline with conditional plotting based on dataset requirements
 def run_full_analysis(dataset_path: str, output_dir_name: str, model_list: list[str] | None = None,
-                      run_feature_importance: bool = False, run_learning_curve: bool = False) -> None:
+                      run_feature_importance: bool = False, run_learning_curve: bool = False,
+                      impute_missing: bool = False) -> None:
        
     base_dir = Path(dataset_path).parent
     output_dir = base_dir / output_dir_name
     
     processor = DataProcessor(dataset_path, random_state=67)
-    processor.clean_data()
+    processor.clean_data(impute=impute_missing)
     processor.plot_correlation_matrix(output_dir / 'correlation_matrix.png')
     processor.split_and_scale()
 
