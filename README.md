@@ -13,7 +13,7 @@ You need Python installed. The scripts use these libraries:
 Install them with:
 pip install pandas numpy matplotlib scikit-learn 
 
-How to Run
+How to Run:
 There are two separate scripts, one for each dataset. Run them from the main project folder so the imports work correctly.
 
 Dataset 1: python dataset1/dataset_1_code.py
