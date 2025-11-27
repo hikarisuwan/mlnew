@@ -11,9 +11,7 @@ You need Python installed. The scripts use these libraries:
 - scikit-learn
 
 Install them with:
-
-```bash
-pip install pandas numpy matplotlib scikit-learn
+pip install pandas numpy matplotlib scikit-learn 
 
 How to Run
 There are two separate scripts, one for each dataset. Run them from the main project folder so the imports work correctly.
