@@ -37,7 +37,7 @@ class DataProcessor:
         self.scaler: StandardScaler | None = None
         self.use_imputation: bool = False
         
-    # loads data, standardises labels and removes missing values(dataset 1) or imputes them(dataset 2)
+    # loads data, standardises labels and removes missing values for large dataset (dataset 1) or imputes them for small dataset (dataset 2)
     def clean_data(self, impute: bool = False) -> pd.DataFrame:
         self.use_imputation = impute
         df = pd.read_csv(self.filepath)
@@ -47,9 +47,10 @@ class DataProcessor:
         if not impute:
             df = df.dropna()
 
-        # standardise labels (we knew data was already in numeric format but just in case)
+        # standardise labels 
         labels = df.iloc[:, -1]
         if labels.dtype == 'object':
+            # we handle different label formats from dataset 1 and 2 ('conductive' vs 'class 1')
             labels = labels.str.strip().str.lower().replace({
                 'non-conductive': '0', 
                 'conductive': '1',
@@ -140,6 +141,7 @@ class Classifier:
         
     # trains specified models or all models if None provided
     def train_models(self, model_names: list[str] | None = None) -> None:
+        # we define a dictionary of models with flags for whether they need feature scaling
         all_models = {
             'Logistic Regression': (LogisticRegression(max_iter=2000, random_state=self.random_state), True),
             'KNN': (KNeighborsClassifier(n_neighbors=5), True),
@@ -201,6 +203,7 @@ class Evaluator:
 
     def plot_confusion_matrices(self, filename_prefix: str) -> None:
         n = len(self.results)
+        # we dynamically calculate the grid dimensions based on the number of trained models
         cols = min(3, n)
         rows = math.ceil(n / cols)
         fig, axes = plt.subplots(rows, cols, figsize=(5 * cols, 4 * rows))
@@ -262,11 +265,13 @@ class Evaluator:
         if classifier_name not in self.results: return
         
         best_meta = self.results[classifier_name]
+        # we clone the estimator to ensure we start with a fresh, untrained model
         estimator = clone(best_meta['model'])
         
         # build pipeline to include imputation if needed
         steps = []
         if self.classifier.dp.use_imputation:
+            # we include the imputer in the pipeline to prevent data leakage during cross-validation
             steps.append(('imputer', SimpleImputer(strategy='mean')))
             
         if best_meta['requires_scaling']:
@@ -298,25 +303,31 @@ def run_full_analysis(dataset_path: str, output_dir_name: str, model_list: list[
                       run_feature_importance: bool = False, run_learning_curve: bool = False,
                       impute_missing: bool = False) -> None:
        
+    # establish output paths relative to the dataset location
     base_dir = Path(dataset_path).parent
     output_dir = base_dir / output_dir_name
     
+    #load and clean data
     processor = DataProcessor(dataset_path, random_state=67)
     processor.clean_data(impute=impute_missing)
     processor.plot_correlation_matrix(output_dir / 'correlation_matrix.png')
     processor.split_and_scale()
 
+    #train and evaluate models
     classifier = Classifier(processor, random_state=67)
     classifier.train_models(model_list)
 
+    #visualize results
     evaluator = Evaluator(classifier, output_dir)
     evaluator.plot_confusion_matrices('confusion_matrix')
     evaluator.plot_comparison('classifier_comparison.png')
     
+    # conditional plotting for dataset 1 and 2
     if run_feature_importance:
         evaluator.plot_feature_importance('feature_importance.png', classifier_name='Random Forest')
         
     if run_learning_curve:
         if classifier.results:
+            # automatic selection of the best model for the learning curve
             best_name, _ = max(classifier.results.items(), key=lambda x: x[1]['accuracy'])
-            evaluator.plot_learning_curve(best_name, 'learning_curve.png')
+            evaluator.plot_learning_curve(best_name, 'learning_curve.png') 
