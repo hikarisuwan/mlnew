@@ -313,9 +313,9 @@ def run_full_analysis(dataset_path: str, output_dir_name: str, model_list: list[
     evaluator.plot_confusion_matrices('confusion_matrix')
     evaluator.plot_comparison('classifier_comparison.png')
     
-if run_feature_importance:
-    evaluator.plot_feature_importance('feature_importance.png', classifier_name='Random Forest')
-    
+    if run_feature_importance:
+        evaluator.plot_feature_importance('feature_importance.png', classifier_name='Random Forest')
+        
     if run_learning_curve:
         if classifier.results:
             best_name, _ = max(classifier.results.items(), key=lambda x: x[1]['accuracy'])
