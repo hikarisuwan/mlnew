@@ -313,13 +313,8 @@ def run_full_analysis(dataset_path: str, output_dir_name: str, model_list: list[
     evaluator.plot_confusion_matrices('confusion_matrix')
     evaluator.plot_comparison('classifier_comparison.png')
     
-    if run_feature_importance:
-        # fallback to default if no valid model found for feature importance
-        target = 'Random Forest'
-        if model_list and target not in model_list:
-             # just use the first available model if Random Forest is missing
-             pass
-        evaluator.plot_feature_importance('feature_importance.png')
+if run_feature_importance:
+    evaluator.plot_feature_importance('feature_importance.png', classifier_name='Random Forest')
     
     if run_learning_curve:
         if classifier.results:
