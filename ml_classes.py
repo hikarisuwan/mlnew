@@ -37,7 +37,7 @@ class DataProcessor:
         self.scaler: StandardScaler | None = None
         self.use_imputation: bool = False
         
-    # loads data, standardises labels and removes missing values for large dataset (dataset 1) or imputes them for small dataset (dataset 2)
+    # removes missing values for large dataset (dataset 1) or imputes them for small dataset (dataset 2)
     def clean_data(self, impute: bool = False) -> pd.DataFrame:
         self.use_imputation = impute
         df = pd.read_csv(self.filepath)
