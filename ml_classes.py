@@ -42,20 +42,19 @@ class DataProcessor:
         self.use_imputation = impute
         df = pd.read_csv(self.filepath)
         
-        # if we are not imputing, we drop rows with missing values
-        # if we are imputing, we leave them in 
+        # if we are not imputing, we drop rows with missing values 
+        # if we are imputing, we leave them in to prevent data leakage.
+        # imputation is handled later in split_and_scale using statistics derived only from the training set.
         if not impute:
             df = df.dropna()
 
         # standardise labels 
         labels = df.iloc[:, -1]
         if labels.dtype == 'object':
-            # we handle different label formats from dataset 1 and 2 ('conductive' vs 'class 1')
+            # handle different label formats 
             labels = labels.str.strip().str.lower().replace({
                 'non-conductive': '0', 
                 'conductive': '1',
-                'class 0': '0',
-                'class 1': '1'
             })
         
         target_col = df.columns[-1]
@@ -203,7 +202,7 @@ class Evaluator:
 
     def plot_confusion_matrices(self, filename_prefix: str) -> None:
         n = len(self.results)
-        # we dynamically calculate the grid dimensions based on the number of trained models
+        # we calculate the grid dimensions based on the number of trained models
         cols = min(3, n)
         rows = math.ceil(n / cols)
         fig, axes = plt.subplots(rows, cols, figsize=(5 * cols, 4 * rows))
@@ -227,19 +226,28 @@ class Evaluator:
 
     def plot_comparison(self, filename: str) -> None:
         metrics = ['accuracy', 'precision', 'recall', 'f1']
+        colors = ['#E53935', '#FF9800', '#FFEB3B', '#4CAF50'] 
         names = list(self.results.keys())
-        fig, ax = plt.subplots(figsize=(12, 6))
+        fig, ax = plt.subplots(figsize=(14, 8)) 
         x = np.arange(len(names))
         width = 0.2
         
         for i, m in enumerate(metrics):
             vals = [self.results[n][m] for n in names]
-            ax.bar(x + i*width, vals, width, label=m.capitalize())
+            bars = ax.bar(x + i*width, vals, width, label=m.capitalize(), color=colors[i])
+                # annotate each bar
+            for bar in bars:
+                height = bar.get_height()
+                ax.text(bar.get_x() + bar.get_width() / 2., 
+                        height + 0.01, 
+                        f'{height:.3f}', 
+                        ha='center', va='bottom', fontsize=8) 
             
         ax.set_xticks(x + width*1.5)
         ax.set_xticklabels(names, rotation=20, ha='right')
-        ax.legend()
+        ax.legend(loc='lower right')
         ax.set_title('Classifier Performance Comparison')
+        ax.set_ylim(0, 1.1) 
         fig.tight_layout()
         self._save_plot(fig, filename)
 
@@ -254,7 +262,15 @@ class Evaluator:
         sorted_imps = importance[indices]
 
         fig, ax = plt.subplots(figsize=(12, 6))
-        ax.bar(sorted_feats, sorted_imps, color='#2ca02c')
+        bars = ax.bar(sorted_feats, sorted_imps, color='#2ca02c')
+
+        for bar in bars:
+            yval = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width()/2, 
+                    yval, 
+                    f'{yval:.3f}', 
+                    ha='center', va='bottom', fontsize=8) # show value up to 3 decimal places
+
         ax.set_xticks(range(len(sorted_feats)))
         ax.set_xticklabels(sorted_feats, rotation=45, ha='right')
         ax.set_title(f'Feature Importances – {classifier_name}')
@@ -271,7 +287,7 @@ class Evaluator:
         # build pipeline to include imputation if needed
         steps = []
         if self.classifier.dp.use_imputation:
-            # we include the imputer in the pipeline to prevent data leakage during cross-validation
+            # we include the imputer in the pipeline to prevent data leakage 
             steps.append(('imputer', SimpleImputer(strategy='mean')))
             
         if best_meta['requires_scaling']:
@@ -295,7 +311,6 @@ class Evaluator:
         ax.axhline(y=0.7, color='r', linestyle='--', label='Target (0.7)')
         ax.set_title(f'Learning Curve – {classifier_name}')
         ax.legend()
-        ax.grid(alpha=0.3)
         fig.tight_layout()
         self._save_plot(fig, filename)
         
@@ -317,7 +332,7 @@ def run_full_analysis(dataset_path: str, output_dir_name: str, model_list: list[
     classifier = Classifier(processor, random_state=67)
     classifier.train_models(model_list)
 
-    #visualize results
+    #visualise results
     evaluator = Evaluator(classifier, output_dir)
     evaluator.plot_confusion_matrices('confusion_matrix')
     evaluator.plot_comparison('classifier_comparison.png')
@@ -330,4 +345,4 @@ def run_full_analysis(dataset_path: str, output_dir_name: str, model_list: list[
         if classifier.results:
             # automatic selection of the best model for the learning curve
             best_name, _ = max(classifier.results.items(), key=lambda x: x[1]['accuracy'])
-            evaluator.plot_learning_curve(best_name, 'learning_curve.png') 
+            evaluator.plot_learning_curve(best_name, 'learning_curve.png')
