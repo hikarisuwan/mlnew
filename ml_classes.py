@@ -269,7 +269,7 @@ class Evaluator:
             ax.text(bar.get_x() + bar.get_width()/2, 
                     yval, 
                     f'{yval:.3f}', 
-                    ha='center', va='bottom', fontsize=8) # show value up to 3 decimal places
+                    ha='center', va='bottom', fontsize=8) 
 
         ax.set_xticks(range(len(sorted_feats)))
         ax.set_xticklabels(sorted_feats, rotation=45, ha='right')
