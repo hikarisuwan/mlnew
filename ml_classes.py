@@ -7,6 +7,7 @@ from sklearn.base import clone
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split, learning_curve
 from sklearn.preprocessing import StandardScaler
+from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
@@ -34,18 +35,19 @@ class DataProcessor:
         self.X_train_scaled: np.ndarray | None = None
         self.X_test_scaled: np.ndarray | None = None
         self.scaler: StandardScaler | None = None
+        self.use_imputation: bool = False
         
     # loads data, standardises labels and removes missing values(dataset 1) or imputes them(dataset 2)
     def clean_data(self, impute: bool = False) -> pd.DataFrame:
+        self.use_imputation = impute
         df = pd.read_csv(self.filepath)
         
-        if impute:
-            # we chose imputation for dataset 2 because data is small
-            df.fillna(df.mean(numeric_only=True), inplace=True)
-        else:
+        # if we are not imputing, we drop rows with missing values
+        # if we are imputing, we leave them in 
+        if not impute:
             df = df.dropna()
 
-    # we knew data was already perfect numbers but we added this to ensure they are in standard numeric format
+        # standardise labels (we knew data was already in numeric format but just in case)
         labels = df.iloc[:, -1]
         if labels.dtype == 'object':
             labels = labels.str.strip().str.lower().replace({
@@ -57,6 +59,8 @@ class DataProcessor:
         
         target_col = df.columns[-1]
         df[target_col] = pd.to_numeric(labels, errors='coerce')
+        
+        # we always drop rows where the TARGET is missing as we can't train/test on those
         df = df.dropna(subset=[target_col])
         df[target_col] = df[target_col].astype(int)
         
@@ -108,6 +112,16 @@ class DataProcessor:
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=test_size, random_state=self.random_state, stratify=y
         )
+
+        # apply imputation if requested
+        if self.use_imputation:
+            imputer = SimpleImputer(strategy='mean')
+            X_train_imputed = imputer.fit_transform(X_train)
+            X_test_imputed = imputer.transform(X_test)
+            
+            # reconstruct dataFrames
+            X_train = pd.DataFrame(X_train_imputed, columns=X_train.columns, index=X_train.index)
+            X_test = pd.DataFrame(X_test_imputed, columns=X_test.columns, index=X_test.index)
 
         self.scaler = StandardScaler()
         self.X_train_scaled = self.scaler.fit_transform(X_train)
@@ -250,14 +264,23 @@ class Evaluator:
         best_meta = self.results[classifier_name]
         estimator = clone(best_meta['model'])
         
+        # build pipeline to include imputation if needed
+        steps = []
+        if self.classifier.dp.use_imputation:
+            steps.append(('imputer', SimpleImputer(strategy='mean')))
+            
         if best_meta['requires_scaling']:
-            estimator = Pipeline([('scaler', StandardScaler()), ('model', estimator)])
+            steps.append(('scaler', StandardScaler()))
+            
+        steps.append(('model', estimator))
+        
+        pipeline = Pipeline(steps)
             
         X = self.classifier.dp.df.drop(columns=['label'])
         y = self.classifier.dp.df['label']
         
         train_sizes, train_scores, test_scores = learning_curve(
-            estimator, X, y, cv=5, n_jobs=-1, 
+            pipeline, X, y, cv=5, n_jobs=-1, 
             train_sizes=np.linspace(0.1, 1.0, 8), random_state=self.classifier.random_state
         )
         
@@ -271,7 +294,6 @@ class Evaluator:
         fig.tight_layout()
         self._save_plot(fig, filename)
         
-# standardised pipeline with conditional plotting based on dataset requirements
 def run_full_analysis(dataset_path: str, output_dir_name: str, model_list: list[str] | None = None,
                       run_feature_importance: bool = False, run_learning_curve: bool = False,
                       impute_missing: bool = False) -> None:
@@ -292,6 +314,11 @@ def run_full_analysis(dataset_path: str, output_dir_name: str, model_list: list[
     evaluator.plot_comparison('classifier_comparison.png')
     
     if run_feature_importance:
+        # fallback to default if no valid model found for feature importance
+        target = 'Random Forest'
+        if model_list and target not in model_list:
+             # just use the first available model if Random Forest is missing
+             pass
         evaluator.plot_feature_importance('feature_importance.png')
     
     if run_learning_curve:
