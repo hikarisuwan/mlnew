@@ -1,4 +1,4 @@
-ML Analysis Project
+#ML Analysis Project
 
 Code for analyzing two datasets using common classifiers (Random forest, KNN etc).
 
