@@ -1,8 +1,8 @@
-# ML Analysis Project
+ML Analysis Project
 
 Code for analyzing two datasets using common classifiers (Random forest, KNN etc).
 
-### Setup
+Setup
 
 You need Python installed. The scripts use these libraries:
 - pandas
