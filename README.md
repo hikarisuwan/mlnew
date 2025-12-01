@@ -16,10 +16,10 @@ pip install pandas numpy matplotlib scikit-learn
 How to Run:
 There are two separate scripts, one for each dataset. 
 
-Dataset 1: python dataset1/dataset_1_code.py
+Dataset 1: `python dataset1/dataset_1_code.py`
 Results go to dataset1/outputs_ds2/
 
-Dataset 2:python dataset2/dataset_2_code.py
+Dataset 2:`python dataset2/dataset_2_code.py`
 Results go to dataset2/outputs_ds2/
 
 File Structure:
