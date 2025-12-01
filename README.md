@@ -23,26 +23,24 @@ Dataset 2:python dataset2/dataset_2_code.py
 Results go to dataset2/outputs_ds2/
 
 File Structure:
+```
 .
 ├── dataset1/
-│   ├── outputs_ds1/ #gets generated upon running
+│   ├── outputs_ds1/                # gets generated upon running
 │   │   ├── classifier_comparison.png
 │   │   ├── confusion_matrix_combined.png
 │   │   ├── correlation_matrix.png
 │   │   └── feature_importance.png
 │   ├── dataset_1.csv
-│   └── dataset_1_code.py #runner script for dataset 1
+│   └── dataset_1_code.py           # runner script for dataset 1
 ├── dataset2/
-│   ├── outputs_ds2/ #gets generated upon running 
+│   ├── outputs_ds2/                # gets generated upon running
 │   │   ├── classifier_comparison.png
 │   │   ├── confusion_matrix_combined.png
 │   │   ├── correlation_matrix.png
 │   │   └── learning_curve.png
 │   ├── dataset_2.csv
-│   └── dataset_2_code.py # runner script for dataset 2
-├── ml_classes.py # main logic for cleaning, training and plotting
+│   └── dataset_2_code.py           # runner script for dataset 2
+├── ml_classes.py                   # main logic for cleaning, training and plotting
 └── README.md
-
-
-
-
+```
