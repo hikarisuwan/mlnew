@@ -14,7 +14,7 @@ Install them with:
 pip install pandas numpy matplotlib scikit-learn 
 
 How to Run:
-There are two separate scripts, one for each dataset. Run them from the main project folder so the imports work correctly.
+There are two separate scripts, one for each dataset. 
 
 Dataset 1: python dataset1/dataset_1_code.py
 Results go to dataset1/outputs_ds2/
