@@ -6,7 +6,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 
 # modify the system path to include the parent directory
-# this allows us to import the 'ml_classes' module which resides in the parent folder
+# this allows us to import the 'ml_classes' module which is in the parent folder
 if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
