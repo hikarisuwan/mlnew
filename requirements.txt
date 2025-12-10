@@ -3,5 +3,5 @@
 
 numpy>=1.21.0       # runs numerical calculations
 pandas>=1.5.0       # runs data loading and cleaning
-matplotlib>=3.5.0   # runs the plotting and visualization steps
+matplotlib>=3.5.0   # runs the plotting and visualisation steps
 scikit-learn>=1.2.0 # runs the machine learning classifiers
