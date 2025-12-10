@@ -1,4 +1,7 @@
-numpy>=1.21.0
-pandas>=1.5.0
-matplotlib>=3.5.0
-scikit-learn>=1.2.0
+# to install dependencies, run the following command:
+# pip install -r requirements.txt
+
+numpy>=1.21.0       # runs numerical calculations
+pandas>=1.5.0       # runs data loading and cleaning
+matplotlib>=3.5.0   # runs the plotting and visualization steps
+scikit-learn>=1.2.0 # runs the machine learning classifiers
