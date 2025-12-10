@@ -406,7 +406,7 @@ class Evaluator:
         fig.tight_layout()
         self._save_plot(fig, filename)
 
-# function to orchestrate the full data analysis pipeline
+# function that manages the end-to-end data analysis process
 # args: dataset_path (str), output_dir_name (str), model_list (list), boolean flags for specific plots
 # no return value
 # stores: runs the entire pipeline and saves all outputs to disk
