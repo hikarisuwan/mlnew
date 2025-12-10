@@ -25,7 +25,7 @@ from sklearn.metrics import (
 class DataProcessor:
 
     # method to initialise variables that store dataset paths and state information
-    # args: self, filepath (str) location of the csv file, random_state (int) for reproducibility
+    # args: self, filepath (str) location of the csv file, random_state (int = 67) for reproducibility
     # no return value
     # stores: initial None states for dataframes and scalers
     def __init__(self, filepath: str, random_state: int = 67):
