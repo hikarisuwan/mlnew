@@ -1,6 +1,3 @@
-# to install dependencies, run the following command:
-# pip install -r requirements.txt
-
 numpy>=1.21.0       # runs numerical calculations
 pandas>=1.5.0       # runs data loading and cleaning
 matplotlib>=3.5.0   # runs the plotting and visualisation steps
