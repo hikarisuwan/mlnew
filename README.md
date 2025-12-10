@@ -31,7 +31,7 @@ File Structure:
 ├── dataset1/
 │   ├── outputs_ds1/                # generated plots 
 │   ├── dataset_1.csv               # input data for dataset 1
-│   └── dataset_1_code.py           # Runner script for dataset 1
+│   └── dataset_1_code.py           # runner script for dataset 1
 ├── dataset2/
 │   ├── outputs_ds2/                # generated plots 
 │   ├── dataset_2.csv               # input data for dataset 2
@@ -41,5 +41,4 @@ File Structure:
 ├── requirements.txt                # list of python dependencies
 ├── .gitignore                      # git exclusion rules
 └── README.md                       # project documentation
-
 ```
